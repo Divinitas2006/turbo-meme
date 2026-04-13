@@ -1,0 +1,1883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy 21st Birthday — Maisha Afroz Mila 🌹</title>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       GOOGLE FONTS — Cinzel (headings), Great Vibes (script),
+       Cormorant Garamond (body copy on the note)
+  ═══════════════════════════════════════════════════════════ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Dancing+Script:wght@500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ═══════════════════════════════════════════════════════════
+       SECTION 1 — RESET & CSS CUSTOM PROPERTIES
+    ═══════════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-deep:       #020510;   /* pitch black / deep space       */
+      --bg-mid:        #050d2a;   /* midnight blue                  */
+      --bg-glow:       #0a1650;   /* soft blue glow layer           */
+      --gold:          #d4af7a;   /* warm champagne gold            */
+      --gold-light:    #f0d9a8;   /* highlight gold                 */
+      --rose:          #c0392b;   /* deep red for petals            */
+      --rose-light:    #e74c5a;   /* lighter petal accent           */
+      --silver:        #b0c4de;   /* silver balloon tint            */
+      --white-soft:    #f5f0eb;   /* off-white text                 */
+      --note-bg:       #fdf8f0;   /* warm cream paper               */
+      --note-line:     #e8ddd0;   /* light line on paper            */
+      --ink:           #3b2a1a;   /* dark ink for note text         */
+      --envelope-body: #c9a87c;   /* parchment envelope             */
+      --envelope-dark: #a07850;   /* shadow on envelope             */
+      --envelope-flap: #b8916a;   /* inner flap                     */
+      --z-bg:          1;         /* canvas backgrounds             */
+      --z-ui:          10;        /* main interactive UI            */
+      --z-note:        20;        /* the sliding note               */
+      --z-sketch:      30;        /* the sketch overlay             */
+      --z-overlay:     100;       /* entry overlay                  */
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow-x: hidden;
+      background: var(--bg-deep);
+      font-family: 'Cormorant Garamond', serif;
+      color: var(--white-soft);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       SECTION 2 — CANVAS LAYERS (balloons + petals)
+    ═══════════════════════════════════════════════════════════ */
+    #canvas-balloons,
+    #canvas-petals {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;  /* never block clicks */
+    }
+    #canvas-balloons { z-index: var(--z-bg); opacity: 0.75; }
+    #canvas-petals   { z-index: calc(var(--z-bg) + 1); opacity: 0.85; }
+
+    /* ═══════════════════════════════════════════════════════════
+       SECTION 3 — RADIAL BACKGROUND GLOW
+    ═══════════════════════════════════════════════════════════ */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 100%, rgba(10,22,80,0.6) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 40% at 20% 20%,  rgba(5,13,42,0.5) 0%, transparent 60%),
+        linear-gradient(160deg, var(--bg-deep) 0%, var(--bg-mid) 45%, var(--bg-deep) 100%);
+      z-index: 0;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       SECTION 4 — ENTRY OVERLAY
+    ═══════════════════════════════════════════════════════════ */
+    #overlay {
+      position: fixed;
+      inset: 0;
+      z-index: var(--z-overlay);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(ellipse at center, #060e2f 0%, #000308 100%);
+      transition: opacity 1.4s cubic-bezier(0.4,0,0.2,1),
+                  visibility 1.4s;
+    }
+    #overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    /* Twinkling stars on overlay */
+    #overlay::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.8), transparent),
+        radial-gradient(1px 1px at 30% 40%, rgba(255,255,255,0.6), transparent),
+        radial-gradient(1.5px 1.5px at 55% 20%, rgba(255,255,255,0.9), transparent),
+        radial-gradient(1px 1px at 75% 60%, rgba(255,255,255,0.7), transparent),
+        radial-gradient(1px 1px at 90% 35%, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1.5px 1.5px at 15% 70%, rgba(255,255,255,0.8), transparent),
+        radial-gradient(1px 1px at 45% 85%, rgba(255,255,255,0.6), transparent),
+        radial-gradient(2px 2px at 80% 80%, rgba(176,196,222,0.9), transparent),
+        radial-gradient(1px 1px at 60% 50%, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1.5px 1.5px at 25% 90%, rgba(255,255,255,0.7), transparent);
+      animation: twinkle 4s ease-in-out infinite alternate;
+    }
+    @keyframes twinkle {
+      0%   { opacity: 0.4; }
+      100% { opacity: 1;   }
+    }
+
+    /* All overlay content needs position:relative + z-index to sit
+       firmly above the ::before star-layer (position:absolute)       */
+    .overlay-title {
+      position: relative;
+      z-index: 2;
+      font-family: 'Cinzel', serif;
+      font-size: clamp(1.1rem, 3vw, 1.6rem);
+      font-weight: 400;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: #c8d8f0;           /* brighter silver — fully legible    */
+      margin-bottom: 0.5rem;
+    }
+    .overlay-name {
+      position: relative;
+      z-index: 2;
+      font-family: 'Great Vibes', cursive;
+      font-size: clamp(3rem, 9vw, 6rem);
+      color: var(--gold-light);
+      text-shadow: 0 0 40px rgba(212,175,122,0.6),
+                   0 0 80px rgba(212,175,122,0.3);
+      margin-bottom: 3rem;
+      animation: nameGlow 3s ease-in-out infinite alternate;
+    }
+    @keyframes nameGlow {
+      0%   { text-shadow: 0 0 30px rgba(212,175,122,0.5), 0 0 60px rgba(212,175,122,0.2); }
+      100% { text-shadow: 0 0 60px rgba(212,175,122,0.9), 0 0 120px rgba(212,175,122,0.5), 0 0 200px rgba(212,175,122,0.2); }
+    }
+
+    /* The "Unlock a Memory" button */
+    #unlock-btn {
+      position: relative;
+      z-index: 2;
+      padding: 1.1rem 3rem;
+      background: transparent;
+      border: 1.5px solid var(--gold);
+      color: var(--gold-light);
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.75rem, 2vw, 0.95rem);
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 2px;
+      overflow: hidden;
+      /* Floating animation */
+      animation: floatBtn 3s ease-in-out infinite, pulseGlow 3s ease-in-out infinite;
+      transition: color 0.3s;
+    }
+    @keyframes floatBtn {
+      0%,100% { transform: translateY(0px);   }
+      50%      { transform: translateY(-12px); }
+    }
+    @keyframes pulseGlow {
+      0%,100% { box-shadow: 0 0 15px rgba(212,175,122,0.3), 0 0 30px rgba(212,175,122,0.1); }
+      50%      { box-shadow: 0 0 30px rgba(212,175,122,0.7), 0 0 60px rgba(212,175,122,0.3), 0 0 100px rgba(212,175,122,0.15); }
+    }
+    /* Shimmer sweep on hover */
+    #unlock-btn::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(212,175,122,0.25), transparent);
+      transition: left 0.5s ease;
+    }
+    #unlock-btn:hover::before { left: 100%; }
+    #unlock-btn:hover {
+      background: rgba(212,175,122,0.08);
+      color: #fff;
+    }
+
+    .overlay-sub {
+      position: relative;
+      z-index: 2;
+      margin-top: 1.8rem;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(0.8rem, 2vw, 0.95rem);
+      letter-spacing: 0.12em;
+      color: rgba(176,196,222,0.85);   /* was 0.45 — now fully legible */
+      font-style: italic;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       SECTION 5 — MAIN STAGE (hidden until overlay dismissed)
+    ═══════════════════════════════════════════════════════════ */
+    #main-stage {
+      position: relative;
+      z-index: var(--z-ui);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem 6rem;
+      opacity: 0;
+      transition: opacity 1.2s ease 0.3s;
+    }
+    #main-stage.visible { opacity: 1; }
+
+    /* Top greeting */
+    .stage-greeting {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.75rem, 1.8vw, 0.95rem);
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: #c8d8f0;            /* bright silver — was near-invisible  */
+      margin-bottom: 0.6rem;
+      text-align: center;
+    }
+    .stage-title {
+      font-family: 'Great Vibes', cursive;
+      font-size: clamp(2.8rem, 8vw, 5.5rem);
+      color: var(--gold-light);
+      text-shadow: 0 0 50px rgba(212,175,122,0.45);
+      text-align: center;
+      line-height: 1.1;
+      margin-bottom: 0.4rem;
+    }
+    .stage-age {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.8rem, 2vw, 1.1rem);
+      letter-spacing: 0.5em;
+      color: rgba(176,196,222,0.9);   /* was 0.55 — now readable        */
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       SECTION 6 — ENVELOPE
+    ═══════════════════════════════════════════════════════════ */
+    .envelope-scene {
+      position: relative;
+      width: min(380px, 90vw);
+      perspective: 900px;
+    }
+
+    /* The envelope body */
+    .envelope {
+      position: relative;
+      width: 100%;
+      padding-bottom: 65%;   /* 3:2 aspect ratio */
+      border-radius: 3px;
+      box-shadow:
+        0 30px 80px rgba(0,0,0,0.7),
+        0 10px 30px rgba(0,0,0,0.5),
+        inset 0 1px 0 rgba(255,255,255,0.12);
+      transform-style: preserve-3d;
+    }
+
+    /* Envelope base gradient */
+    .env-body {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(170deg, #d4a96a 0%, #b8834a 40%, #9e6b38 100%);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    /* Envelope decorative wax seal */
+    .env-seal {
+      position: absolute;
+      left: 50%; bottom: 30%;
+      transform: translateX(-50%);
+      width: 52px; height: 52px;
+      background: radial-gradient(circle at 35% 35%, #e74c3c 0%, #8b1a1a 100%);
+      border-radius: 50%;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      z-index: 3;
+      transition: transform 0.6s ease, opacity 0.6s ease;
+    }
+    .envelope.open .env-seal {
+      transform: translateX(-50%) scale(0) rotate(180deg);
+      opacity: 0;
+    }
+
+    /* Bottom triangle of envelope (V-fold lines) */
+    .env-body::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 55%;
+      background: linear-gradient(135deg, #c4894a 50%, transparent 50%),
+                  linear-gradient(225deg, #c4894a 50%, transparent 50%);
+      background-size: 50% 100%;
+      background-position: left, right;
+      background-repeat: no-repeat;
+      opacity: 0.4;
+    }
+
+    /* Side flap lines */
+    .env-body::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(135deg, rgba(0,0,0,0.12) 50%, transparent 50%),
+        linear-gradient(225deg, rgba(0,0,0,0.12) 50%, transparent 50%);
+      background-size: 50% 45%, 50% 45%;
+      background-position: top left, top right;
+      background-repeat: no-repeat;
+    }
+
+    /* Flap (top fold) — animated open */
+    .env-flap {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 50%;
+      transform-origin: top center;
+      transform-style: preserve-3d;
+      transition: transform 0.8s cubic-bezier(0.4,0,0.2,1);
+      z-index: 4;
+    }
+    .env-flap-face {
+      position: absolute;
+      inset: 0;
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+      background: linear-gradient(160deg, #d4a96a 0%, #a87840 100%);
+    }
+    /* Dark inner side of flap */
+    .env-flap-inner {
+      position: absolute;
+      inset: 0;
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+      background: linear-gradient(160deg, #c49060 0%, #8a5c30 100%);
+      transform: rotateX(180deg);
+      backface-visibility: hidden;
+    }
+    .envelope.open .env-flap {
+      transform: rotateX(-180deg);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       SECTION 7 — OPEN BUTTON
+    ═══════════════════════════════════════════════════════════ */
+    #open-btn {
+      display: block;
+      margin: 2.2rem auto 0;
+      padding: 0.95rem 2.6rem;
+      background: transparent;
+      border: 1.5px solid rgba(212,175,122,0.6);
+      color: var(--gold-light);
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.7rem, 1.8vw, 0.85rem);
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s ease;
+      /* Magnetic hover handled in JS */
+    }
+    #open-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 0; height: 0;
+      background: rgba(212,175,122,0.15);
+      border-radius: 50%;
+      transform: translate(-50%,-50%);
+      transition: width 0.6s ease, height 0.6s ease;
+    }
+    #open-btn:hover::before { width: 300px; height: 300px; }
+    #open-btn:hover {
+      border-color: var(--gold-light);
+      box-shadow: 0 0 25px rgba(212,175,122,0.4), 0 0 60px rgba(212,175,122,0.15);
+      color: #fff;
+    }
+    #open-btn.hidden { opacity: 0; pointer-events: none; transform: translateY(10px); transition: all 0.4s; }
+
+    /* ═══════════════════════════════════════════════════════════
+       SECTION 8 — THE BIRTHDAY NOTE
+       Redesigned as a fixed bottom-sheet so it is ALWAYS fully
+       visible on every device — slides up from viewport bottom.
+    ═══════════════════════════════════════════════════════════ */
+    #note-wrapper {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 25;                        /* above main UI, below sketch panel */
+      max-height: 90vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+      /* Start hidden below the screen */
+      transform: translateY(100%);
+      transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1);
+      pointer-events: none;
+      /* Custom scrollbar */
+      scrollbar-width: thin;
+      scrollbar-color: rgba(180,140,90,0.35) transparent;
+    }
+    /* When revealed, slide up into view */
+    #note-wrapper.revealed {
+      transform: translateY(0%);
+      pointer-events: auto;
+    }
+
+    /* Inner centering wrapper */
+    .note-inner {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 0 1rem 2rem;
+    }
+
+    /* Drag handle at top of sheet */
+    .note-handle {
+      width: 50px;
+      height: 4px;
+      background: rgba(180,140,90,0.4);
+      border-radius: 4px;
+      margin: 0.9rem auto 0;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .note-handle:hover { background: rgba(180,140,90,0.75); }
+
+    .note-card {
+      background: var(--note-bg);
+      border-radius: 18px 18px 0 0;      /* rounded top corners — sheet style  */
+      padding: 0.5rem 2rem 2.2rem;
+      box-shadow:
+        0 -12px 50px rgba(0,0,0,0.55),
+        0 -4px 20px rgba(0,0,0,0.35),
+        inset 0 0 0 1px rgba(180,140,90,0.15);
+      /* Ruled paper lines */
+      background-image:
+        linear-gradient(var(--note-bg) 0%, var(--note-bg) 100%),
+        repeating-linear-gradient(
+          transparent,
+          transparent 27px,
+          var(--note-line) 28px
+        );
+      background-size: 100% 100%, 100% 28px;
+      background-position: 0 0, 0 80px;
+      min-height: 60vh;                  /* guarantee content space            */
+    }
+
+    /* Decorative red ribbon at top of note */
+    .note-card::before {
+      content: '';
+      display: block;
+      width: 40px; height: 3px;
+      background: linear-gradient(90deg, var(--rose), var(--rose-light));
+      margin: 0 auto 1.4rem;
+      border-radius: 2px;
+      box-shadow: 0 0 8px rgba(192,57,43,0.5);
+    }
+
+    .note-salutation {
+      font-family: 'Great Vibes', cursive;
+      font-size: clamp(1.6rem, 4.5vw, 2.1rem);
+      color: var(--rose);
+      text-align: center;
+      margin-bottom: 0.8rem;
+    }
+    .note-body {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(0.88rem, 2.2vw, 1rem);
+      line-height: 1.85;
+      color: var(--ink);
+      text-align: justify;
+    }
+    .note-body em {
+      font-style: italic;
+      color: #6b3a2a;
+    }
+    .note-body strong {
+      font-weight: 600;
+      color: #5a2d1a;
+    }
+    .note-divider {
+      text-align: center;
+      color: var(--rose-light);
+      font-size: 1.1rem;
+      letter-spacing: 0.4em;
+      margin: 1rem 0;
+      opacity: 0.7;
+    }
+    .note-sign {
+      font-family: 'Dancing Script', cursive;
+      font-size: clamp(1.2rem, 3.5vw, 1.5rem);
+      color: var(--rose);
+      text-align: right;
+      margin-top: 0.8rem;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       SECTION 9 — GIFT / CLICK-ME BUTTON INSIDE NOTE
+    ═══════════════════════════════════════════════════════════ */
+    .gift-area {
+      margin-top: 1.4rem;
+      text-align: center;
+    }
+    .gift-emoji {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: 0.5rem;
+      animation: emojiFloat 2s ease-in-out infinite;
+    }
+    @keyframes emojiFloat {
+      0%,100% { transform: translateY(0) rotate(-3deg); }
+      50%      { transform: translateY(-7px) rotate(3deg); }
+    }
+    #gift-btn {
+      display: inline-block;
+      padding: 0.75rem 2rem;
+      background: linear-gradient(135deg, var(--rose) 0%, #8b1a1a 100%);
+      color: #fff;
+      font-family: 'Cinzel', serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 2px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(192,57,43,0.5);
+      transition: all 0.35s ease;
+    }
+    #gift-btn::after {
+      content: '';
+      position: absolute;
+      top: -50%; left: -60%;
+      width: 30%; height: 200%;
+      background: rgba(255,255,255,0.25);
+      transform: skewX(-20deg);
+      animation: sheen 3s ease-in-out infinite 1.5s;
+    }
+    @keyframes sheen {
+      0%   { left: -60%; }
+      30%  { left: 130%; }
+      100% { left: 130%; }
+    }
+    #gift-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(192,57,43,0.7);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       SECTION 10 — SKETCH REVEAL PANEL (slides up from bottom)
+    ═══════════════════════════════════════════════════════════ */
+    #sketch-panel {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: var(--z-sketch);
+      background: linear-gradient(180deg, rgba(2,5,16,0.97) 0%, rgba(5,13,42,0.99) 100%);
+      border-top: 1px solid rgba(212,175,122,0.2);
+      padding: 3rem 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.8rem;
+      transform: translateY(100%);
+      transition: transform 1s cubic-bezier(0.22,1,0.36,1);
+      max-height: 95vh;
+      overflow-y: auto;
+      /* Scrollbar */
+      scrollbar-width: thin;
+      scrollbar-color: rgba(212,175,122,0.3) transparent;
+    }
+    #sketch-panel.visible {
+      transform: translateY(0%);
+    }
+
+    /* Close handle */
+    .sketch-handle {
+      width: 50px; height: 4px;
+      background: rgba(212,175,122,0.35);
+      border-radius: 4px;
+      position: absolute;
+      top: 0.9rem; left: 50%;
+      transform: translateX(-50%);
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .sketch-handle:hover { background: rgba(212,175,122,0.7); }
+
+    .sketch-label {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.7rem, 1.8vw, 0.85rem);
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.7;
+      text-align: center;
+    }
+    .sketch-title {
+      font-family: 'Great Vibes', cursive;
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      color: var(--gold-light);
+      text-shadow: 0 0 40px rgba(212,175,122,0.4);
+      text-align: center;
+      line-height: 1.1;
+    }
+
+    /* Image frame */
+    .sketch-frame {
+      position: relative;
+      width: min(320px, 85vw);
+      aspect-ratio: 3/4;
+      border: 1px solid rgba(212,175,122,0.3);
+      border-radius: 3px;
+      overflow: hidden;
+      box-shadow:
+        0 0 0 8px rgba(212,175,122,0.05),
+        0 0 0 9px rgba(212,175,122,0.08),
+        0 20px 60px rgba(0,0,0,0.7);
+    }
+    /* Corner ornaments */
+    .sketch-frame::before,
+    .sketch-frame::after {
+      content: '';
+      position: absolute;
+      width: 20px; height: 20px;
+      border-color: var(--gold);
+      border-style: solid;
+      z-index: 2;
+    }
+    .sketch-frame::before {
+      top: 8px; left: 8px;
+      border-width: 2px 0 0 2px;
+    }
+    .sketch-frame::after {
+      bottom: 8px; right: 8px;
+      border-width: 0 2px 2px 0;
+    }
+
+    /* ── REPLACE THIS SRC WITH REAL SKETCH IMAGE ── */
+    .sketch-img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      /* Placeholder background */
+      background: linear-gradient(160deg, #1a0d0d 0%, #2a1010 100%);
+    }
+    /* Placeholder overlay text (visible when no real image) */
+    .sketch-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      background: linear-gradient(160deg, #120808 0%, #1e0c0c 100%);
+    }
+    .sketch-placeholder-icon { font-size: 3rem; opacity: 0.5; }
+    .sketch-placeholder-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      color: rgba(212,175,122,0.5);
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 0 1rem;
+      letter-spacing: 0.05em;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       SECTION 11 — THANK YOU / FINALE MESSAGE
+    ═══════════════════════════════════════════════════════════ */
+    #thankyou {
+      width: min(500px, 90vw);
+      text-align: center;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 1.2s ease 0.5s, transform 1.2s ease 0.5s;
+    }
+    #thankyou.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .ty-divider {
+      color: var(--gold);
+      font-size: 1.3rem;
+      letter-spacing: 0.5em;
+      margin-bottom: 1.2rem;
+      opacity: 0.5;
+    }
+    .ty-heading {
+      font-family: 'Great Vibes', cursive;
+      font-size: clamp(2rem, 6vw, 3rem);
+      color: var(--gold-light);
+      margin-bottom: 1rem;
+      text-shadow: 0 0 30px rgba(212,175,122,0.4);
+    }
+    .ty-body {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(0.88rem, 2vw, 1rem);
+      line-height: 1.9;
+      color: rgba(245,240,235,0.7);
+      font-style: italic;
+    }
+    .ty-sign {
+      font-family: 'Dancing Script', cursive;
+      font-size: clamp(1.1rem, 3vw, 1.4rem);
+      color: var(--rose-light);
+      margin-top: 1.2rem;
+    }
+    .ty-hearts {
+      font-size: 1.5rem;
+      letter-spacing: 0.4rem;
+      margin-top: 0.8rem;
+      animation: heartBeat 1.5s ease-in-out infinite;
+    }
+    @keyframes heartBeat {
+      0%,100% { transform: scale(1); }
+      50%      { transform: scale(1.15); }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       SECTION 12 — FLOATING PARTICLES (pure CSS star sparkles)
+    ═══════════════════════════════════════════════════════════ */
+    .sparkles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: calc(var(--z-bg) + 2);
+      overflow: hidden;
+    }
+    .sparkle {
+      position: absolute;
+      width: 2px; height: 2px;
+      background: var(--gold-light);
+      border-radius: 50%;
+      animation: sparkleAnim linear infinite;
+      opacity: 0;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       SECTION 13 — RESPONSIVENESS TWEAKS
+    ═══════════════════════════════════════════════════════════ */
+    @media (max-width: 480px) {
+      .note-card { padding: 1.6rem 1.4rem 1.4rem; }
+      #sketch-panel { padding: 2.5rem 1rem 1.5rem; }
+    }
+
+    /* Ensure everything above canvas */
+    #main-stage, #overlay { z-index: var(--z-ui); }
+    #overlay               { z-index: var(--z-overlay); }
+    #sketch-panel          { z-index: var(--z-sketch); }
+
+    /* Smooth scroll */
+    #sketch-panel { scroll-behavior: smooth; }
+
+    /* ═══════════════════════════════════════════════════════════
+       SECTION 14 — AUDIO INDICATOR (bottom left badge)
+    ═══════════════════════════════════════════════════════════ */
+    #audio-badge {
+      position: fixed;
+      bottom: 1.4rem; left: 1.4rem;
+      z-index: calc(var(--z-overlay) - 1);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(5,13,42,0.8);
+      border: 1px solid rgba(212,175,122,0.2);
+      border-radius: 30px;
+      padding: 0.45rem 1rem;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.6s ease, border-color 0.3s;
+      backdrop-filter: blur(8px);
+    }
+    #audio-badge.visible { opacity: 1; }
+    #audio-badge:hover { border-color: rgba(212,175,122,0.5); }
+    .audio-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 14px;
+    }
+    .audio-bar {
+      width: 3px;
+      background: var(--gold);
+      border-radius: 2px;
+      animation: barDance 0.8s ease-in-out infinite alternate;
+    }
+    .audio-bar:nth-child(1) { height: 6px;  animation-delay: 0s; }
+    .audio-bar:nth-child(2) { height: 12px; animation-delay: 0.15s; }
+    .audio-bar:nth-child(3) { height: 8px;  animation-delay: 0.3s; }
+    .audio-bar:nth-child(4) { height: 14px; animation-delay: 0.1s; }
+    @keyframes barDance {
+      0%   { height: 4px; opacity: 0.5; }
+      100% { height: 14px; opacity: 1; }
+    }
+    .audio-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      color: rgba(212,175,122,0.6);
+      text-transform: uppercase;
+    }
+    /* ═══════════════════════════════════════════════════════════
+       SECTION 15 — SPECIAL GIFT BUTTON (inside sketch panel)
+    ═══════════════════════════════════════════════════════════ */
+    .special-gift-area {
+      width: min(480px, 90vw);
+      text-align: center;
+      padding: 2rem 0 1rem;
+      border-top: 1px solid rgba(212,175,122,0.15);
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 1.2s ease 1.2s, transform 1.2s ease 1.2s;
+    }
+    .special-gift-area.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .special-gift-label {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.65rem, 1.5vw, 0.78rem);
+      letter-spacing: 0.42em;
+      text-transform: uppercase;
+      color: rgba(176,196,222,0.7);
+      margin-bottom: 1.2rem;
+      display: block;
+    }
+    #special-gift-btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 1rem 2.6rem;
+      background: linear-gradient(135deg, rgba(10,22,80,0.6) 0%, rgba(5,13,42,0.8) 100%);
+      border: 1.5px solid rgba(212,175,122,0.55);
+      color: var(--gold-light);
+      font-family: 'Cinzel', serif;
+      font-size: clamp(0.7rem, 1.8vw, 0.85rem);
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 3px;
+      overflow: hidden;
+      transition: all 0.4s ease;
+      animation: giftBtnPulse 2.5s ease-in-out infinite;
+    }
+    @keyframes giftBtnPulse {
+      0%,100% { box-shadow: 0 0 18px rgba(212,175,122,0.25), 0 0 40px rgba(212,175,122,0.08); }
+      50%      { box-shadow: 0 0 35px rgba(212,175,122,0.55), 0 0 80px rgba(212,175,122,0.22), 0 0 120px rgba(212,175,122,0.10); }
+    }
+    #special-gift-btn .btn-icon {
+      font-size: 1.3rem;
+      animation: iconSpin 4s linear infinite;
+    }
+    @keyframes iconSpin {
+      0%   { transform: rotate(0deg) scale(1);    }
+      50%  { transform: rotate(180deg) scale(1.2); }
+      100% { transform: rotate(360deg) scale(1);  }
+    }
+    /* Shimmer sweep */
+    #special-gift-btn::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 60%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(212,175,122,0.2), transparent);
+      transition: left 0.6s ease;
+      transform: skewX(-15deg);
+    }
+    #special-gift-btn:hover::before { left: 160%; }
+    #special-gift-btn:hover {
+      background: linear-gradient(135deg, rgba(20,40,120,0.8) 0%, rgba(10,22,80,0.9) 100%);
+      border-color: var(--gold-light);
+      color: #fff;
+      transform: translateY(-3px);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       SECTION 16 — VIDEO MODAL
+    ═══════════════════════════════════════════════════════════ */
+    #video-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      /* Blurred dark backdrop */
+      background: rgba(1, 3, 12, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.7s cubic-bezier(0.4,0,0.2,1),
+                  visibility 0.7s;
+    }
+    #video-modal.open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    /* Gold border frame around video */
+    .video-frame {
+      position: relative;
+      width: min(760px, 92vw);
+      border: 1px solid rgba(212,175,122,0.35);
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow:
+        0 0 0 6px rgba(212,175,122,0.05),
+        0 0 0 7px rgba(212,175,122,0.08),
+        0 40px 100px rgba(0,0,0,0.9),
+        0 0 80px rgba(212,175,122,0.12);
+      transform: translateY(40px) scale(0.95);
+      transition: transform 0.8s cubic-bezier(0.22,1,0.36,1);
+    }
+    #video-modal.open .video-frame {
+      transform: translateY(0) scale(1);
+    }
+
+    /* Corner ornaments on video frame */
+    .video-frame::before,
+    .video-frame::after {
+      content: '';
+      position: absolute;
+      width: 24px; height: 24px;
+      border-color: var(--gold);
+      border-style: solid;
+      z-index: 3;
+      pointer-events: none;
+    }
+    .video-frame::before { top: 10px; left: 10px; border-width: 2px 0 0 2px; }
+    .video-frame::after  { bottom: 10px; right: 10px; border-width: 0 2px 2px 0; }
+
+    /* The actual <video> tag */
+    .modal-video {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #000;
+      outline: none;
+    }
+
+    /* Title above video */
+    .video-modal-title {
+      font-family: 'Great Vibes', cursive;
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      color: var(--gold-light);
+      text-align: center;
+      margin-bottom: 1.2rem;
+      text-shadow: 0 0 30px rgba(212,175,122,0.5);
+      transform: translateY(20px);
+      opacity: 0;
+      transition: transform 0.8s ease 0.3s, opacity 0.8s ease 0.3s;
+    }
+    #video-modal.open .video-modal-title {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Close button */
+    #video-close-btn {
+      position: absolute;
+      top: 1.2rem; right: 1.4rem;
+      width: 40px; height: 40px;
+      background: rgba(212,175,122,0.1);
+      border: 1px solid rgba(212,175,122,0.3);
+      border-radius: 50%;
+      color: var(--gold-light);
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s ease;
+      z-index: 10;
+    }
+    #video-close-btn:hover {
+      background: rgba(212,175,122,0.25);
+      border-color: var(--gold-light);
+      transform: rotate(90deg);
+    }
+
+    /* Caption below video */
+    .video-caption {
+      margin-top: 1rem;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: clamp(0.8rem, 2vw, 0.95rem);
+      color: rgba(176,196,222,0.65);
+      text-align: center;
+      letter-spacing: 0.08em;
+      transform: translateY(10px);
+      opacity: 0;
+      transition: transform 0.8s ease 0.5s, opacity 0.8s ease 0.5s;
+    }
+    #video-modal.open .video-caption {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       BACKGROUND CANVAS LAYERS
+  ═══════════════════════════════════════════════════════════ -->
+  <!-- Balloon canvas — z-index 1 -->
+  <canvas id="canvas-balloons"></canvas>
+  <!-- Petal canvas — z-index 2 -->
+  <canvas id="canvas-petals"></canvas>
+
+  <!-- Sparkle layer -->
+  <div class="sparkles" id="sparkle-layer"></div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       AUDIO ELEMENT
+       ▶ REPLACE src WITH YOUR "Tere Pyaar Mein" audio file URL
+  ═══════════════════════════════════════════════════════════ -->
+  <audio id="bgm" loop preload="auto">
+    <!-- Replace the src below with your actual audio file URL -->
+    <source src="Bayaan - Teri Tasveer (Audio).mp3" type="audio/mpeg" />
+    <!-- ▲▲▲  REPLACE PLACEHOLDER ABOVE  ▲▲▲ -->
+  </audio>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       AUDIO BADGE (mute/unmute)
+  ═══════════════════════════════════════════════════════════ -->
+  <div id="audio-badge" title="Click to toggle music">
+    <div class="audio-bars">
+      <div class="audio-bar"></div>
+      <div class="audio-bar"></div>
+      <div class="audio-bar"></div>
+      <div class="audio-bar"></div>
+    </div>
+    <span class="audio-label">Music</span>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       PHASE 0 — ENTRY OVERLAY
+  ═══════════════════════════════════════════════════════════ -->
+  <div id="overlay">
+    <p class="overlay-title">A Letter For</p>
+    <h1 class="overlay-name">Maisha Afroz Mila</h1>
+    <button id="unlock-btn">✦ Unlock a Memory ✦</button>
+    <p class="overlay-sub">Turn on your sound for the full experience 🎵</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       PHASE 1–4 — MAIN STAGE (envelope + note)
+  ═══════════════════════════════════════════════════════════ -->
+  <main id="main-stage">
+
+    <!-- Page header -->
+    <p class="stage-greeting">The Twenty First Chapter</p>
+    <h2 class="stage-title">Happy Birthday, Mila</h2>
+    <p class="stage-age">✦ &nbsp; XIX &nbsp; ✦</p>
+
+    <!-- PHASE 1: ENVELOPE SCENE (envelope only — note is now a viewport-level sheet) -->
+    <div class="envelope-scene">
+
+      <!-- PHASE 1: THE ENVELOPE -->
+      <div class="envelope" id="envelope">
+        <div class="env-body"></div>
+        <div class="env-flap">
+          <div class="env-flap-face"></div>
+          <div class="env-flap-inner"></div>
+        </div>
+        <div class="env-seal">🌹</div>
+      </div>
+
+    </div><!-- /.envelope-scene -->
+
+    <!-- Open button below envelope -->
+    <button id="open-btn">Open This Letter ✉</button>
+
+  </main><!-- /#main-stage -->
+
+  <!-- ═══════════════════════════════════════════════════════════
+       PHASE 3 — BIRTHDAY NOTE SHEET
+       Fixed to viewport bottom, slides up like a bottom-sheet.
+       This guarantees the full note is always visible + scrollable.
+  ═══════════════════════════════════════════════════════════ -->
+  <div id="note-wrapper" aria-label="Birthday letter for Mila">
+
+    <!-- Drag handle (click to dismiss) -->
+    <div class="note-handle" id="note-close-handle" title="Close note"></div>
+
+    <div class="note-inner">
+      <div class="note-card">
+
+        <!-- ─── PHASE 3: THE BIRTHDAY NOTE ─── -->
+        <p class="note-salutation">My Dearest Mila,</p>
+
+        <div class="note-body">
+          <p>
+            Today, the universe quietly celebrates twenty-one luminous years of
+            <em>your existence</em> and it does so with the deepest reverence,
+            for you, <strong>Maisha Afroz Mila</strong>, are nothing short of
+            a masterpiece.
+          </p>
+
+          <div class="note-divider">✿ &nbsp; ✿ &nbsp; ✿</div>
+
+          <p>
+            A student of <strong>NSU</strong>, yet far beyond mere academics, you carry a mind that doesn’t just learn, it perceives, and a presence that doesn’t seek attention, yet effortlessly commands it.
+          </p>
+
+          <div class="note-divider">· &nbsp; · &nbsp; ·</div>
+
+          <p>
+           There’s something rare about you, a simplicity so disarming, a kindness so uncalculated, and a loyalty that doesn’t announce itself, yet stands unshaken.
+In a world rehearsed in pretence, you remain quietly, dangerously genuine.
+          </p>
+
+          <div class="note-divider">· &nbsp; · &nbsp; ·</div>
+
+          <p>
+            There is something ineffably <em>magnetic</em> about your simplicity.
+            You carry your goodness without armour or announcement. Your humility
+            grounds every room you walk into, and your kindness, so genuine,
+            so unhurried, lingers long after you have left. That is a gift
+            only the rarest souls possess.
+          </p>
+
+          <div class="note-divider">✿ &nbsp; ✿ &nbsp; ✿</div>
+
+            <p>
+           And honestly… it’s almost unfair, how someone can be this grounded, this intellectual,
+and still carry a softness that feels like calm after chaos.
+NSU might have gained a meritorious mind,
+but those around you? They got something far more irreplaceable.
+          </p>
+
+          <div class="note-divider">✿ &nbsp; ✿ &nbsp; ✿</div>
+
+           <p>
+          A few lines, just for you,
+
+Meeting you felt like fate’s quiet conspiracy,
+Speaking to you, an indulgence chosen without regret.
+Friendship with you became a blessing that never felt borrowed,
+And knowing you... a rare assurance that time was never misplaced.
+
+Not just radiance, but a presence that refines the air around it,
+Not just beauty, but a heart that restores what the world forgets.
+
+Twenty-one looks effortless on you,
+then again, excellence always does.
+
+Stay rare, stay composed,
+and try not to outshine the universe too much…
+it’s already struggling to keep up. 😌✨
+          </p>
+
+          <div class="note-divider">✿ &nbsp; ✿ &nbsp; ✿</div>
+
+          <p>
+            To know <strong>Mila</strong> is to understand that grace does not
+            require grandeur. You are bright, and beautiful, and brilliantly
+            yourself. May this nineteenth year of yours be as radiant,
+            as profound, and as full of wonder as you deserve.
+          </p>
+        </div>
+
+        <p class="note-sign">With all the love in the world,<br>Someone who sees you 🌹</p>
+
+        <!-- PHASE 4: GIFT BUTTON -->
+        <div class="gift-area">
+          <span class="gift-emoji">🥺✨</span>
+          <button id="gift-btn">✦ &nbsp; There's One More Thing &nbsp; ✦</button>
+        </div>
+
+      </div><!-- /.note-card -->
+    </div><!-- /.note-inner -->
+  </div><!-- /#note-wrapper -->
+
+  <!-- ═══════════════════════════════════════════════════════════
+       PHASE 5–6 — SKETCH PANEL (slides from bottom)
+  ═══════════════════════════════════════════════════════════ -->
+  <section id="sketch-panel" aria-label="A special gift">
+    <!-- Drag handle / close bar -->
+    <div class="sketch-handle" id="sketch-close-handle" title="Close"></div>
+
+    <p class="sketch-label">A Gift, Painted in Admiration</p>
+    <h3 class="sketch-title">For the Girl Who Deserves Everything</h3>
+
+    <!-- PHASE 5: IMAGE FRAME -->
+    <div class="sketch-frame">
+      <!-- ▼▼▼  REPLACE src BELOW WITH YOUR SKETCH IMAGE  ▼▼▼ -->
+      <img
+        class="sketch-img"
+        id="sketch-img"
+        src=""
+        alt="Soha's Sketch for Mila"
+        onerror="this.style.display='none'"
+      />
+      <!-- Placeholder visible when no real image provided -->
+      <div class="sketch-placeholder" id="sketch-placeholder">
+        <span class="sketch-placeholder-icon">🖼️</span>
+        <p class="sketch-placeholder-text">
+          Insert Soha's Sketch Here<br>
+          <small style="opacity:0.6; font-size:0.75rem;">(Replace the src attribute of #sketch-img)</small>
+        </p>
+      </div>
+    </div>
+
+    <!-- PHASE 6: THANK YOU NOTE -->
+    <div id="thankyou">
+      <p class="ty-divider">✦ &nbsp; ✦ &nbsp; ✦</p>
+      <h4 class="ty-heading">Thank You, Mila</h4>
+      <p class="ty-body">
+        Thank you for being the rare kind of person this world desperately
+        needs more of. For reading this letter with those lovely eyes of yours.
+        For existing so effortlessly and yet so remarkably.<br /><br />
+        You are, without question, the most <em>exquisite</em> person I have
+        ever had the privilege of knowing. The world is softer, warmer,
+        and more beautiful because you are in it.
+      </p>
+      <p class="ty-sign">Happy 21st, forever & always. 🌹</p>
+      <p class="ty-hearts">♡ &nbsp; ♡ &nbsp; ♡</p>
+    </div><!-- /#thankyou -->
+
+    <!-- ═══ SPECIAL GIFT VIDEO BUTTON ═══ -->
+    <div class="special-gift-area" id="special-gift-area">
+      <span class="special-gift-label">But wait… there's still one more thing</span>
+      <button id="special-gift-btn">
+        <span class="btn-icon">🎁</span>
+        ✦ &nbsp; A Special Gift &nbsp; ✦
+      </button>
+    </div>
+
+  </section><!-- /#sketch-panel -->
+
+  <!-- ═══════════════════════════════════════════════════════════
+       VIDEO MODAL — opens on "Special Gift" button click
+       ▶ REPLACE src IN <source> WITH YOUR ACTUAL VIDEO FILE URL
+  ═══════════════════════════════════════════════════════════ -->
+  <div id="video-modal" role="dialog" aria-modal="true" aria-label="Special video gift">
+    <!-- Close X button -->
+    <button id="video-close-btn" aria-label="Close video">✕</button>
+
+    <!-- Animated title -->
+    <h3 class="video-modal-title">One Last Surprise, Mila 🎬</h3>
+
+    <!-- Video frame with ornamental border -->
+    <div class="video-frame">
+      <video
+        class="modal-video"
+        id="modal-video"
+        controls
+        preload="none"
+        playsinline
+      >
+        <!-- ▼▼▼  REPLACE src WITH YOUR VIDEO URL  ▼▼▼ -->
+        <source src="Untitled ‑ Made with FlexClip.mp4" type="video/mp4" />
+        <!-- ▲▲▲  REPLACE PLACEHOLDER ABOVE  ▲▲▲ -->
+        Your browser does not support the video tag.
+      </video>
+    </div>
+
+    <!-- Soft caption -->
+    <p class="video-caption">
+      A little something made with all the warmth in the world — just for you. 🌹
+    </p>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════
+       JAVASCRIPT
+  ═══════════════════════════════════════════════════════════ -->
+  <script>
+  /* ─────────────────────────────────────────────────────────────
+     UTILITY: Safe querySelector
+  ───────────────────────────────────────────────────────────── */
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => document.querySelectorAll(sel);
+
+  /* ─────────────────────────────────────────────────────────────
+     1. BALLOON CANVAS
+     Draws softly rising balloons (blue, silver, lavender tones)
+  ───────────────────────────────────────────────────────────── */
+  (function initBalloons() {
+    const canvas = $('#canvas-balloons');
+    const ctx    = canvas.getContext('2d');
+
+    // Balloon colors — translucent blues and silvers
+    const COLORS = [
+      'rgba(100,149,237,0.45)',  // cornflower blue
+      'rgba(176,196,222,0.40)',  // light steel blue
+      'rgba(135,206,235,0.35)',  // sky blue
+      'rgba(200,210,240,0.38)',  // silver-blue
+      'rgba(160,180,220,0.42)',  // periwinkle
+      'rgba(220,230,255,0.30)',  // pale silver
+    ];
+
+    let W, H, balloons = [];
+
+    // Resize canvas to viewport
+    function resize() {
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+
+    // Create a single balloon object
+    function createBalloon(fromBottom = false) {
+      const r = 18 + Math.random() * 28;  // radius
+      return {
+        x:      Math.random() * W,
+        y:      fromBottom ? H + r + Math.random() * H * 0.3
+                           : Math.random() * H,
+        r,
+        speed:  0.25 + Math.random() * 0.55,  // upward drift speed
+        drift:  (Math.random() - 0.5) * 0.35, // horizontal sway per frame
+        sway:   0,                              // accumulated sway angle
+        swaySpeed: 0.008 + Math.random() * 0.012,
+        color:  COLORS[Math.floor(Math.random() * COLORS.length)],
+        stringLen: 30 + Math.random() * 30,
+        alpha:  0.55 + Math.random() * 0.35,
+      };
+    }
+
+    // Draw one balloon (rounded ellipse + highlight + string)
+    function drawBalloon(b) {
+      ctx.save();
+      ctx.globalAlpha = b.alpha;
+
+      // Shadow/glow beneath balloon
+      ctx.shadowColor  = b.color;
+      ctx.shadowBlur   = 18;
+
+      // Balloon body
+      ctx.beginPath();
+      ctx.ellipse(b.x, b.y, b.r, b.r * 1.15, 0, 0, Math.PI * 2);
+      ctx.fillStyle = b.color;
+      ctx.fill();
+
+      // Highlight
+      ctx.beginPath();
+      ctx.ellipse(
+        b.x - b.r * 0.28,
+        b.y - b.r * 0.3,
+        b.r * 0.28,
+        b.r * 0.2,
+        -0.5, 0, Math.PI * 2
+      );
+      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      ctx.fill();
+
+      // String
+      ctx.shadowBlur = 0;
+      ctx.beginPath();
+      ctx.moveTo(b.x, b.y + b.r * 1.15);
+      ctx.bezierCurveTo(
+        b.x + 8, b.y + b.r * 1.15 + b.stringLen * 0.4,
+        b.x - 8, b.y + b.r * 1.15 + b.stringLen * 0.7,
+        b.x, b.y + b.r * 1.15 + b.stringLen
+      );
+      ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+      ctx.lineWidth   = 0.8;
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, W, H);
+
+      balloons.forEach((b, i) => {
+        // Drift upward + horizontal sway
+        b.sway += b.swaySpeed;
+        b.x    += Math.sin(b.sway) * 0.7 + b.drift;
+        b.y    -= b.speed;
+
+        // If gone off top, recycle at bottom
+        if (b.y < -b.r * 2 - b.stringLen) {
+          balloons[i] = createBalloon(true);
+        }
+        drawBalloon(b);
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    // Initialise
+    resize();
+    window.addEventListener('resize', () => {
+      resize();
+      balloons = Array.from({ length: 22 }, () => createBalloon(false));
+    });
+    balloons = Array.from({ length: 22 }, () => createBalloon(false));
+    animate();
+  })();
+
+
+  /* ─────────────────────────────────────────────────────────────
+     2. ROSE PETAL CANVAS
+     Hyper-realistic falling red petals with depth-of-field blur
+  ───────────────────────────────────────────────────────────── */
+  (function initPetals() {
+    const canvas = $('#canvas-petals');
+    const ctx    = canvas.getContext('2d');
+
+    // Petal depth layers: each layer has a different scale + blur
+    const LAYERS = [
+      { scale: 0.5, blur: 2.5, alpha: 0.45 },  // far / blurry
+      { scale: 0.8, blur: 1.2, alpha: 0.65 },  // mid
+      { scale: 1.2, blur: 0.4, alpha: 0.85 },  // near / sharp
+    ];
+
+    let W, H, petals = [];
+
+    function resize() {
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+
+    // Build a petal path as a simple organic quadratic shape
+    function drawPetalShape(ctx, w, h) {
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.bezierCurveTo( w * 0.5, -h * 0.4, w * 1.1, h * 0.2,  w * 0.5, h);
+      ctx.bezierCurveTo(-w * 0.1, h * 0.8, -w * 0.5, h * 0.4,   0, 0);
+      ctx.closePath();
+    }
+
+    function createPetal(fromTop = false) {
+      const layer = LAYERS[Math.floor(Math.random() * LAYERS.length)];
+      const baseW = 16, baseH = 22;
+      return {
+        x:       Math.random() * W,
+        y:       fromTop ? -30 - Math.random() * H * 0.4 : Math.random() * H,
+        vx:      (Math.random() - 0.5) * 1.1,
+        vy:      0.6 + Math.random() * 1.4,
+        rot:     Math.random() * Math.PI * 2,
+        rotSpeed: (Math.random() - 0.5) * 0.04,
+        sway:    Math.random() * Math.PI * 2,
+        swaySpd: 0.015 + Math.random() * 0.025,
+        w:       baseW * layer.scale,
+        h:       baseH * layer.scale,
+        blur:    layer.blur,
+        alpha:   layer.alpha * (0.75 + Math.random() * 0.25),
+        // Gradient red
+        hue:     345 + Math.floor(Math.random() * 20) - 10,
+        lightness: 30 + Math.floor(Math.random() * 20),
+      };
+    }
+
+    function drawPetal(p) {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.globalAlpha = p.alpha;
+
+      // Simulate blur via shadow
+      if (p.blur > 0) {
+        ctx.shadowColor = `hsla(${p.hue},70%,${p.lightness}%,0.5)`;
+        ctx.shadowBlur  = p.blur * 8;
+      }
+
+      // Petal gradient
+      const grad = ctx.createRadialGradient(0, 0, 1, p.w * 0.3, p.h * 0.2, p.h);
+      grad.addColorStop(0, `hsla(${p.hue+10},80%,${p.lightness+20}%,1)`);
+      grad.addColorStop(0.5, `hsla(${p.hue},75%,${p.lightness}%,1)`);
+      grad.addColorStop(1, `hsla(${p.hue-10},65%,${p.lightness-10}%,0.7)`);
+
+      drawPetalShape(ctx, p.w, p.h);
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Vein highlight
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(p.w * 0.45, p.h * 0.6);
+      ctx.strokeStyle = `hsla(${p.hue+5},60%,${p.lightness+30}%,0.3)`;
+      ctx.lineWidth   = 0.6;
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, W, H);
+
+      petals.forEach((p, i) => {
+        p.sway += p.swaySpd;
+        p.x    += p.vx + Math.sin(p.sway) * 0.9;
+        p.y    += p.vy;
+        p.rot  += p.rotSpeed;
+
+        // Recycle if off screen
+        if (p.y > H + 40 || p.x < -60 || p.x > W + 60) {
+          petals[i] = createPetal(true);
+        }
+        drawPetal(p);
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    resize();
+    window.addEventListener('resize', () => {
+      resize();
+      petals = Array.from({ length: 55 }, () => createPetal(false));
+    });
+    petals = Array.from({ length: 55 }, () => createPetal(false));
+    animate();
+  })();
+
+
+  /* ─────────────────────────────────────────────────────────────
+     3. CSS SPARKLE PARTICLES — small golden twinkles
+  ───────────────────────────────────────────────────────────── */
+  (function initSparkles() {
+    const layer = $('#sparkle-layer');
+    const COUNT = 35;
+
+    for (let i = 0; i < COUNT; i++) {
+      const s = document.createElement('div');
+      s.className = 'sparkle';
+      const size = 1 + Math.random() * 3;
+      const delay = Math.random() * 8;
+      const dur   = 4 + Math.random() * 8;
+      const top   = Math.random() * 100;
+      const left  = Math.random() * 100;
+
+      s.style.cssText = `
+        width: ${size}px; height: ${size}px;
+        top: ${top}%; left: ${left}%;
+        animation: sparkleAnim ${dur}s ${delay}s linear infinite;
+        background: ${Math.random() > 0.5 ? '#f0d9a8' : '#b0c4de'};
+      `;
+      layer.appendChild(s);
+    }
+
+    // Inject the keyframe dynamically
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes sparkleAnim {
+        0%    { opacity: 0; transform: scale(0) rotate(0deg); }
+        20%   { opacity: 1; transform: scale(1) rotate(45deg); }
+        80%   { opacity: 1; transform: scale(1) rotate(315deg); }
+        100%  { opacity: 0; transform: scale(0) rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+  })();
+
+
+  /* ─────────────────────────────────────────────────────────────
+     4. ENTRY OVERLAY LOGIC
+     Clicking "Unlock a Memory" → fades overlay, plays audio,
+     reveals main stage.
+  ───────────────────────────────────────────────────────────── */
+  const overlay    = $('#overlay');
+  const mainStage  = $('#main-stage');
+  const bgm        = $('#bgm');
+  const audioBadge = $('#audio-badge');
+  const unlockBtn  = $('#unlock-btn');
+
+  unlockBtn.addEventListener('click', () => {
+    // Fade out overlay
+    overlay.classList.add('hidden');
+
+    // Reveal main stage
+    setTimeout(() => {
+      mainStage.classList.add('visible');
+    }, 400);
+
+    // Start audio (user gesture unlocks autoplay restriction)
+    bgm.volume = 0;
+    bgm.play().then(() => {
+      // Gentle fade-in for audio
+      let vol = 0;
+      const fadeIn = setInterval(() => {
+        vol = Math.min(vol + 0.025, 0.7);
+        bgm.volume = vol;
+        if (vol >= 0.7) clearInterval(fadeIn);
+      }, 120);
+
+      // Show audio badge
+      setTimeout(() => audioBadge.classList.add('visible'), 1500);
+    }).catch(() => {
+      // Audio blocked; still show badge so user can try
+      setTimeout(() => audioBadge.classList.add('visible'), 1500);
+    });
+  });
+
+
+  /* ─────────────────────────────────────────────────────────────
+     5. AUDIO BADGE TOGGLE (mute / unmute)
+  ───────────────────────────────────────────────────────────── */
+  audioBadge.addEventListener('click', () => {
+    if (bgm.paused) {
+      bgm.play();
+      audioBadge.classList.remove('paused');
+    } else {
+      bgm.pause();
+      audioBadge.classList.add('paused');
+    }
+  });
+
+
+  /* ─────────────────────────────────────────────────────────────
+     6. MAGNETIC HOVER EFFECT on #open-btn
+     The button follows the cursor slightly within its zone
+  ───────────────────────────────────────────────────────────── */
+  const openBtn = $('#open-btn');
+
+  openBtn.addEventListener('mousemove', (e) => {
+    const rect   = openBtn.getBoundingClientRect();
+    const cx     = rect.left + rect.width / 2;
+    const cy     = rect.top  + rect.height / 2;
+    const dx     = (e.clientX - cx) * 0.28;
+    const dy     = (e.clientY - cy) * 0.28;
+    openBtn.style.transform = `translate(${dx}px, ${dy}px)`;
+  });
+
+  openBtn.addEventListener('mouseleave', () => {
+    openBtn.style.transform = 'translate(0,0)';
+    openBtn.style.transition = 'transform 0.5s cubic-bezier(0.22,1,0.36,1)';
+  });
+
+
+  /* ─────────────────────────────────────────────────────────────
+     7. PHASE 2 — ENVELOPE OPEN → NOTE SHEET SLIDES UP
+  ───────────────────────────────────────────────────────────── */
+  const envelope    = $('#envelope');
+  const noteWrapper = $('#note-wrapper');
+
+  openBtn.addEventListener('click', () => {
+    openBtn.disabled = true;
+
+    // Open envelope flap
+    envelope.classList.add('open');
+
+    // Slide the note sheet up from the bottom of the viewport
+    setTimeout(() => {
+      noteWrapper.classList.add('revealed');
+    }, 450);
+
+    // Hide open button
+    setTimeout(() => {
+      openBtn.classList.add('hidden');
+    }, 200);
+  });
+
+  /* Note close handle — click drag bar to dismiss the note */
+  const noteCloseHandle = $('#note-close-handle');
+  if (noteCloseHandle) {
+    noteCloseHandle.addEventListener('click', () => {
+      noteWrapper.classList.remove('revealed');
+      // Re-enable open btn so envelope can be re-opened
+      setTimeout(() => {
+        openBtn.disabled = false;
+        openBtn.classList.remove('hidden');
+      }, 800);
+    });
+  }
+
+  /* Swipe-down to dismiss the note on mobile */
+  let noteTouchStartY = 0;
+  noteWrapper.addEventListener('touchstart', (e) => {
+    noteTouchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  noteWrapper.addEventListener('touchend', (e) => {
+    const dy = e.changedTouches[0].clientY - noteTouchStartY;
+    if (dy > 80 && noteWrapper.scrollTop === 0) {
+      noteWrapper.classList.remove('revealed');
+    }
+  }, { passive: true });
+
+
+  /* ─────────────────────────────────────────────────────────────
+     8. PHASE 5 — GIFT BUTTON → SKETCH PANEL SLIDES UP
+  ───────────────────────────────────────────────────────────── */
+  const giftBtn     = $('#gift-btn');
+  const sketchPanel = $('#sketch-panel');
+  const thankyou    = $('#thankyou');
+  const sketchImg   = $('#sketch-img');
+  const sketchPlaceholder = $('#sketch-placeholder');
+
+  giftBtn.addEventListener('click', () => {
+    // Show sketch panel
+    sketchPanel.classList.add('visible');
+
+    // If the img src is set and loads, hide placeholder
+    if (sketchImg.src && sketchImg.src !== window.location.href) {
+      sketchImg.addEventListener('load', () => {
+        sketchPlaceholder.style.display = 'none';
+      }, { once: true });
+    }
+
+    // Phase 6: Fade in thank-you after panel reveals
+    setTimeout(() => {
+      thankyou.classList.add('visible');
+    }, 1200);
+
+    // Scroll panel to top smoothly
+    setTimeout(() => {
+      sketchPanel.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 100);
+  });
+
+
+  /* ─────────────────────────────────────────────────────────────
+     9. SKETCH PANEL CLOSE HANDLE
+  ───────────────────────────────────────────────────────────── */
+  $('#sketch-close-handle').addEventListener('click', () => {
+    sketchPanel.classList.remove('visible');
+  });
+
+  // Also allow swipe-down to close on mobile
+  let touchStartY = 0;
+  sketchPanel.addEventListener('touchstart', (e) => {
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+
+  sketchPanel.addEventListener('touchend', (e) => {
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if (dy > 80 && sketchPanel.scrollTop === 0) {
+      sketchPanel.classList.remove('visible');
+    }
+  }, { passive: true });
+
+
+  /* ─────────────────────────────────────────────────────────────
+     10. CONFETTI BURST on gift button click
+     A one-shot canvas confetti for the climax moment
+  ───────────────────────────────────────────────────────────── */
+  giftBtn.addEventListener('click', () => {
+    launchConfetti();
+  });
+
+  function launchConfetti() {
+    const canvas = document.createElement('canvas');
+    canvas.style.cssText = `
+      position:fixed; inset:0; width:100%; height:100%;
+      pointer-events:none; z-index:500;
+    `;
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const COLORS = ['#d4af7a','#f0d9a8','#c0392b','#e74c5a','#b0c4de','#ffffff'];
+    const pieces = Array.from({ length: 120 }, () => ({
+      x:  canvas.width / 2,
+      y:  canvas.height * 0.6,
+      vx: (Math.random() - 0.5) * 14,
+      vy: -(Math.random() * 14 + 4),
+      r:  3 + Math.random() * 5,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      rot: Math.random() * Math.PI * 2,
+      rotSpd: (Math.random() - 0.5) * 0.2,
+      alpha: 1,
+      gravity: 0.35,
+    }));
+
+    let frame = 0;
+    function drawConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      pieces.forEach(p => {
+        p.vy    += p.gravity;
+        p.x     += p.vx;
+        p.y     += p.vy;
+        p.rot   += p.rotSpd;
+        p.alpha -= 0.012;
+        if (p.alpha <= 0) return;
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.globalAlpha = Math.max(p.alpha, 0);
+        ctx.fillStyle   = p.color;
+        ctx.fillRect(-p.r, -p.r * 0.5, p.r * 2, p.r);
+        ctx.restore();
+      });
+
+      frame++;
+      if (frame < 140) {
+        requestAnimationFrame(drawConfetti);
+      } else {
+        canvas.remove();
+      }
+    }
+    drawConfetti();
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     11. SPECIAL GIFT BUTTON — reveals the video modal
+  ───────────────────────────────────────────────────────────── */
+  const specialGiftBtn  = $('#special-gift-btn');
+  const specialGiftArea = $('#special-gift-area');
+  const videoModal      = $('#video-modal');
+  const modalVideo      = $('#modal-video');
+  const videoCloseBtn   = $('#video-close-btn');
+
+  // Open modal
+  specialGiftBtn.addEventListener('click', () => {
+    videoModal.classList.add('open');
+    document.body.style.overflow = 'hidden';  // prevent body scroll while modal open
+
+    // Optionally pause BGM while video plays (re-enables on close)
+    if (!bgm.paused) {
+      bgm.volume = 0.15;  // duck the BGM softly instead of hard-muting
+    }
+  });
+
+  // Close modal — X button
+  videoCloseBtn.addEventListener('click', closeVideoModal);
+
+  // Close modal — click on dark backdrop (outside video-frame)
+  videoModal.addEventListener('click', (e) => {
+    if (e.target === videoModal) closeVideoModal();
+  });
+
+  // Close modal — Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && videoModal.classList.contains('open')) {
+      closeVideoModal();
+    }
+  });
+
+  function closeVideoModal() {
+    videoModal.classList.remove('open');
+    document.body.style.overflow = '';
+
+    // Pause the video when modal closes
+    if (modalVideo) {
+      modalVideo.pause();
+      modalVideo.currentTime = 0;
+    }
+
+    // Restore BGM volume
+    if (!bgm.paused) {
+      let v = bgm.volume;
+      const restore = setInterval(() => {
+        v = Math.min(v + 0.05, 0.7);
+        bgm.volume = v;
+        if (v >= 0.7) clearInterval(restore);
+      }, 80);
+    }
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     12. SHOW SPECIAL GIFT AREA once thank-you is visible
+         (triggered alongside the thank-you fade-in)
+  ───────────────────────────────────────────────────────────── */
+  // Override the giftBtn click to also show special-gift-area
+  // We hook into the existing giftBtn listener chain
+  const _origGiftClick = () => {
+    setTimeout(() => {
+      specialGiftArea.classList.add('visible');
+    }, 2200);   // slightly after thank-you appears
+  };
+  giftBtn.addEventListener('click', _origGiftClick);
+
+  </script>
+</body>
+</html>
